@@ -1,12 +1,16 @@
 ## Business Requirement:
+
 Hi Daniel,
 
-    Thank you for the insight shared on the DVD Movie Rental dataset, your findings helped the senior executives to decide what to do next.
+Thank you for the insight shared on the DVD Movie Rental dataset, your findings helped the senior executives to decide what to do next.
 
-    Could you please take a look at the `User_logs data` in the Health schema and let me know what you find. I will appreciate if I can get it before noon tomorrow for review since the meeting with the client is scheduled for Monday. Thank you
+Could you please take a look at the `User_logs data` in the Health schema and let me know what you find. I will appreciate if I can get it before noon tomorrow for review since the meeting with the client is scheduled for Monday. Thank you
 
 Kind Regards,
 Danny Ma.   
+
+
+**Query:**
 
 ```sql
 SELECT *
