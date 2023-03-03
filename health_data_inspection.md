@@ -21,7 +21,7 @@ The table has the following columns and datatypes:
 
 > The only difference between TEXT and VARCHAR(n) is that you can limit the maximum length of a VARCHAR column, for example, VARCHAR(255)does not allow inserting a string more than 255 characters long.
 
-Let's see the fist 10 rows of the table.
+Let's see the first 10 rows of the table.
 **Query:**
 ```sql
 SELECT *
