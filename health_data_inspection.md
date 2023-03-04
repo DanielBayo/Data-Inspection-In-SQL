@@ -64,7 +64,20 @@ This showed that there are **43,891** records in the table. It will be okay to k
 SELECT COUNT(DISTINCT id)
 FROM health.user_logs;
 ```
-The query showed that there are **554** unique id values in the `Health.user_logs` table. Let inspect the `measure` column in the table and take a look at the most frequent values within this column. See the query below,
+The query showed that there are **554** unique id values in the `Health.user_logs` table. It will be okay to know the earliest and the lastest date in the `log_date` column.
+
+```sql
+SELECT
+  MIN(log_date) AS min_log_date,
+  MAX(log_date) AS max_log_date
+FROM health.user_logs;
+```
+|min_log_date|max_log_date|
+|:----|:----|
+|2015-01-11T00:00:00.000Z|2020-11-15T00:00:00.000Z|
+
+The `log_date` column revealed that the records were logged between **2015-01-11** and **2020-11-15**, which is almost 6 years.
+Let's inspect the `measure` column in the table and take a look at the most frequent values within this column. See the query below,
 
 ```sql
 SELECT
@@ -372,4 +385,4 @@ Yes we can therefore confirm this!
 
 Hi Danny,
 
-The dataset has **6** features and **43,891**  records, 
+The dataset has **6** features and **43,891**  records, there are also about **554** unique `id` values which suggest the number of unique users.
