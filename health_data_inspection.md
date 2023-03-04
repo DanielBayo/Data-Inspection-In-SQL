@@ -7,6 +7,7 @@ Thank you for the insight shared on the DVD Movie Rental dataset, your findings 
 Could you please take a look at the `User_logs data` in the Health schema and let me know what you find. I will appreciate if I can get it before noon tomorrow for review since the meeting with the client is scheduled for Monday. Thank you
 
 Kind Regards,
+
 Danny Ma.   
 
 ##  SOLUTION:
@@ -22,7 +23,9 @@ The table has the following columns and datatypes:
 > The only difference between TEXT and VARCHAR(n) is that you can limit the maximum length of a VARCHAR column, for example, VARCHAR(255)does not allow inserting a string more than 255 characters long.
 
 Let's see the first 10 rows of the table.
+
 **Query:**
+
 ```sql
 SELECT *
 FROM health.user_logs
@@ -45,10 +48,16 @@ LIMIT 10;
 
 The snapshot of the first 10 rows showed that the `Health.user_logs` table has 6 columns. To know the total record count on this table, I ran the following query
 
+**Query:**
+
 ```sql
 SELECT COUNT(*)
 FROM health.user_logs;
 ```
+|count|
+|:----|
+|43891|
+
 This showed that there are **43,891** records in the table. It will be okay to know the unique `id` values there are in this dataset. This will give us a feel of how many unique users there are whilst we continue getting a better picture of the dataset. We get this by running the following query,
 
 ```sql
@@ -128,6 +137,50 @@ LIMIT 10;
 |128|319|
 |115|319|
 
+It will be okay if we have a descriptive statistics of this column too. Let's check it out with the folowing query
+
+```sql
+SELECT
+  MIN(measure_value) AS min_measure_value,
+  MAX(measure_value) AS max_measure_value,
+  ROUND(
+  AVG(measure_value),
+  2
+  ) AS avg_measure_value,
+  ROUND(
+  STDDEV(measure_value),
+  2) AS stdev_measure_value
+FROM health.user_logs;
+```
+|0.min_measure_value|0.max_measure_value|0.avg_measure_value|0.stdev_measure_value|
+|:----|:----|:----|:----|
+|-1|39642120|1986.23|267610.87|
+
+The minimum value is **-1** and the maximum is **39,642,120** with an average of **1,986**. With a standard deviation of **267,610.87**, the values are greatly disparsed. However, since the measure_value is based on different measures, let look at this description for each categories in the `measure` column using the query below:
+
+```sql
+SELECT
+  measure,
+  MIN(measure_value) AS min_measure_value,
+  MAX(measure_value) AS max_measure_value,
+  ROUND(
+  AVG(measure_value),
+  2
+  ) AS avg_measure_value,
+  ROUND(
+  STDDEV(measure_value),
+  2) AS stdev_measure_value
+FROM health.user_logs
+GROUP BY measure;
+```
+|measure|min_measure_value|max_measure_value|avg_measure_value|stdev_measure_value|
+|:----|:----|:----|:----|:----|
+|blood_glucose|-1|227228|177.35|1157.32|
+|blood_pressure|0|189|95.40|54.89|
+|weight|0|39642120|28786.85|1062759.55|
+
+From the table shown above, we have a better description of each of the categories in the `measure` column based on their values in the `measure_value` columns. We can tell that the larger values are from the `weight` category.
+
 ## Systolic
 ```sql
 SELECT
@@ -151,7 +204,24 @@ LIMIT 10;
 |135|57|
 |124|55|
 
-There seems to me a lot of nulls..
+There seems to me a lot of nulls. Let's consider the descriptive statistics as well with the following query
+
+```sql
+SELECT
+  MIN(systolic) AS min_systolic,
+  MAX(systolic) AS max_systolic,
+  ROUND(
+  AVG(systolic),
+  2
+  ) AS avg_systolic,
+  ROUND(
+  STDDEV(systolic),
+  2) AS stdev_systolic
+FROM health.user_logs;
+```
+|min_systolic|max_systolic|avg_systolic|stdev_systolic|
+|:----|:----|:----|:----|
+|-1|204|17.09|43.79|
 
 ### Diastolic
 ```sql
@@ -176,9 +246,26 @@ LIMIT 10;
 |83|106|
 |76|102|
 
-This also contain a lot of null values.
+Noticed how many 0 values there were for the `measure_value` field and `null` values for both `systolic` and `diastolic` columns? This also contain a lot of null values. Let's also look at the descriptive statistics for this column;
 
-Noticed how many 0 values there were for the `measure_value` field and `null` values for both `systolic` and `diastolic` columns? It will be best to further inspect the rows a bit further to check if this only happens for certain `measure` values when the condition measure_value = 0 is met and the systolic and diastolic columns are null.
+```sql
+SELECT
+  MIN(diastolic) AS min_diastolic,
+  MAX(diastolic) AS max_diastolic,
+  ROUND(
+  AVG(diastolic),
+  2
+  ) AS avg_diastolic,
+  ROUND(
+  STDDEV(diastolic),
+  2) AS stdev_diastolic
+FROM health.user_logs;
+```
+|min_diastolic|max_diastolic|avg_diastolic|stdev_diastolic|
+|:----|:----|:----|:----|
+|-1|1914|10.75|30.71|
+
+It will be best to further inspect the rows a bit further to check if this only happens for certain `measure` values when the condition measure_value = 0 is met and the systolic and diastolic columns are null.
 
 ```sql
 SELECT 
@@ -280,3 +367,9 @@ GROUP BY 1;
 |blood_glucose|25580|
 
 Yes we can therefore confirm this!
+
+## My Feedback to Danny Ma!
+
+Hi Danny,
+
+The dataset has **6** features and **43,891**  records, 
