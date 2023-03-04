@@ -165,11 +165,11 @@ SELECT
   2) AS stdev_measure_value
 FROM health.user_logs;
 ```
-|0.min_measure_value|0.max_measure_value|0.avg_measure_value|0.stdev_measure_value|
+|min_measure_value|max_measure_value|avg_measure_value|stdev_measure_value|
 |:----|:----|:----|:----|
 |-1|39642120|1986.23|267610.87|
 
-The minimum value is **-1** and the maximum is **39,642,120** with an average of **1,986**. With a standard deviation of **267,610.87**, the values are greatly disparsed. However, since the measure_value is based on different measures, let look at this description for each categories in the `measure` column using the query below:
+The minimum value is **-1** and the maximum is **39,642,120** with an average of **1,986**. With a standard deviation of **267,610.87**, the values are greatly disparsed. However, since the `measure_value` is based on different `measure`, let look at this description for each categories in the `measure` column using the query below:
 
 ```sql
 SELECT
@@ -385,4 +385,11 @@ Yes we can therefore confirm this!
 
 Hi Danny,
 
-The dataset has **6** features and **43,891**  records, there are also about **554** unique `id` values which suggest the number of unique users.
+The dataset has **6** features and **43,891**  records, there are also about **554** unique `id` values which suggest the number of unique users. The records were logged between **11th January, 2015** and **15th November, 2020**. 
+
+Taking a look at the `measure` column in the table, **88%** of the total records are a measure of the `blood_glucose`, other measures includes `weight` and `blood_pressure`. 
+
+I also discovered that of the **554** unique `id` in the dataset about **51%** of the records were from a single id in the `id` column.
+
+
+
