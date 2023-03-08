@@ -393,11 +393,62 @@ I also discovered that of the **554** unique `id` in the dataset about **51%** o
 
 Even though `blood_pressure` has the least number of the total records, about **562 (23% of 2,417)** of the total records  for `blood_pressure` measure have their `measure_value` to be equal to 0, a further look into the dataset showed that when the `measure_value=0` the relevant `systolic` and `diastolic` fields are recorded. Also considering the instance when the  `measure_value` is not equal to zero for the `blood_pressure` measure, the `systolic` value is the same as the `measure_value`. 
 
- In conclusion, I found out that the `systolic` and `diastolic` columns contains null value for `weight` and `blood_glucose` measures only. The minimum value for these two columns are -1. Let me know if these findings are helpful.
+In conclusion, I found out that the `systolic` and `diastolic` columns contains null value for `weight` and `blood_glucose` measures only. The minimum value for these two columns are -1. Let me know if these findings are helpful.
 
- Best regards,
+Best regards,
  
 Daniel Ayangbile 
+
+
+## Dealing with Duplicates
+
+### Detecting Duplicates
+The first ingredient for this recipe is the basic record count for our table - plain and simple using the COUNT(*).
+```sql
+SELECT COUNT(*)
+FROM deduplic_user_logs;
+```
+In order to know the number of distinct records in a table, one of these methods can be used;
+-----------------------------------------
+--COMMON TABLE EXPRESSION (CTE)
+-----------------------------------------
+```sql
+WITH deduplic_user_logs AS (
+  SELECT DISTINCT *
+  FROM health.user_logs
+)
+SELECT COUNT(*)
+FROM deduplic_user_logs
+```
+----------------------------------------
+--SUBQUERY
+----------------------------------------
+```sql
+SELECT COUNT (*)
+FROM (SELECT DISTINCT *
+FROM health.user_logs) AS dup_count
+```
+---------------------------------------
+--TEMPORARY TABLE
+---------------------------------------
+```sql
+DROP TABLE IF EXISTS deduplicated_logs;
+CREATE TEMP TABLE deduplicated_logs AS
+SELECT DISTINCT *
+FROM health.user_logs;
+
+SELECT COUNT(*)
+FROM deduplicated_logs;
+```
+
+#### How do I know which to use?
+The answer to this is based on your need for this table later,
+
+If yes you would need it later - opt for temporary tables.
+
+If no - CTEs are your friend.
+
+Usually we would not recommend subqueries as they are less readable than CTEs - making it more difficult for others to quickly understand your code!
 
 
 
