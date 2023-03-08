@@ -469,6 +469,124 @@ If no - CTEs are your friend.
 
 Usually we would not recommend subqueries as they are less readable than CTEs - making it more difficult for others to quickly understand your code!
 
+## Identifying Duplicate Records
+```sql
+SELECT
+  id,
+  log_date,
+  measure,
+  measure_value,
+  systolic,
+  diastolic,
+  COUNT(*) AS frequency
+FROM health.user_logs
+GROUP BY
+  id,
+  log_date,
+  measure,
+  measure_value,
+  systolic,
+  diastolic
+ORDER BY frequency DESC
+LIMIT 10;
+```
+|id|log_date|measure|measure_value|systolic|diastolic|frequency|
+|:----|:----|:----|:----|:----|:----|:----|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2019-12-06T00:00:00.000Z|blood_glucose|401| | |104|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2019-12-05T00:00:00.000Z|blood_glucose|401| | |77|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2019-12-04T00:00:00.000Z|blood_glucose|401| | |72|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2019-12-07T00:00:00.000Z|blood_glucose|401| | |70|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2020-09-30T00:00:00.000Z|blood_glucose|401| | |39|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2020-09-29T00:00:00.000Z|blood_glucose|401| | |24|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2020-10-02T00:00:00.000Z|blood_glucose|401| | |18|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2019-12-10T00:00:00.000Z|blood_glucose|140| | |12|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2019-12-11T00:00:00.000Z|blood_glucose|220| | |12|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2020-04-15T00:00:00.000Z|blood_glucose|236| | |12|
+... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ...
+|id|log_date|measure|measure_value|systolic|diastolic|frequency|
+|:----|:----|:----|:----|:----|:----|:----|
+|abc634a555bbba7d6d6584171fdfa206ebf6c9a0|2020-05-17T00:00:00.000Z|blood_pressure|105|105|78|1|
+|c7af488f4c8efc0ecdfd6d0c427e7c133bf2f2d9|2020-01-22T00:00:00.000Z|blood_glucose|172| | |1|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2020-05-07T00:00:00.000Z|blood_glucose|189| | |1|
+|576fdb528e5004f733912fae3020e7d322dbc31a|2019-12-15T00:00:00.000Z|blood_pressure|0|124|72|1|
+|46d921f1111a1d1ad5dd6eb6e4d0533ab61907c9|2019-12-24T00:00:00.000Z|blood_pressure|0|183|161|1|
+|8b130a2836a80239b4d1e3677302709cea70a911|2019-12-31T00:00:00.000Z|blood_glucose|109.799995| | |1|
+|d41d5b2fa4d9a2caf3a3e839432da76450bc2041|2019-11-11T00:00:00.000Z|blood_glucose|176|0|0|1|
+|6c2f9a8372dac248192c50219c97f9087ab778ba|2019-12-30T00:00:00.000Z|blood_glucose|207|0|0|1|
+|ef84a9ac5319687e5fba6174cd1db3d7f1cfca8f|2020-08-20T00:00:00.000Z|blood_glucose|206|0|0|1|
+|f3596442e990f21f929015a1c2d3514706e5d73d|2020-06-25T00:00:00.000Z|blood_glucose|244|0|0|1|
 
+The table above show the first and last 10 records counts for each records in the dataset. Notice how the frequency for some of these values is 1 - whilst some are greater than 1? Let;s try to remove the duplicate records only
 
+```sql
+DROP TABLE IF EXISTS unique_duplicate_records;
+CREATE TEMPORARY TABLE unique_duplicate_records AS
+SELECT *
+FROM health.user_logs
+GROUP BY
+  id,
+  log_date,
+  measure,
+  measure_value,
+  systolic,
+  diastolic
+HAVING COUNT(*) > 1;
 
+SELECT *
+FROM unique_duplicate_records
+LIMIT 10;
+```
+Let’s say for example - we want to know which exact records are duplicated - but also how many times they appeared. We can use the CTE approach with a WHERE filter condition to do this.
+```sql
+WITH groupby_counts AS (
+  SELECT
+    id,
+    log_date,
+    measure,
+    measure_value,
+    systolic,
+    diastolic,
+    COUNT(*) AS frequency
+  FROM health.user_logs
+  GROUP BY
+    id,
+    log_date,
+    measure,
+    measure_value,
+    systolic,
+    diastolic
+)
+SELECT *
+FROM groupby_counts
+WHERE frequency > 1
+ORDER BY frequency DESC
+LIMIT 10;
+```
+|id|log_date|measure|measure_value|systolic|diastolic|frequency|
+|:----|:----|:----|:----|:----|:----|:----|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2019-12-06T00:00:00.000Z|blood_glucose|401| | |104|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2019-12-05T00:00:00.000Z|blood_glucose|401| | |77|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2019-12-04T00:00:00.000Z|blood_glucose|401| | |72|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2019-12-07T00:00:00.000Z|blood_glucose|401| | |70|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2020-09-30T00:00:00.000Z|blood_glucose|401| | |39|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2020-09-29T00:00:00.000Z|blood_glucose|401| | |24|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2020-10-02T00:00:00.000Z|blood_glucose|401| | |18|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2019-12-10T00:00:00.000Z|blood_glucose|140| | |12|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2019-12-11T00:00:00.000Z|blood_glucose|220| | |12|
+|054250c692e07a9fa9e62e345231df4b54ff435d|2020-04-15T00:00:00.000Z|blood_glucose|236| | |12|
+
+## Do we actually need to care about duplicate values?
+
+The context of your dataset will determine if you should care about duplicates or not.
+
+> For the context of this dataset, this real world messy dataset captures data taken from individuals logging their health measurements via an online portal throughout the day.
+
+For example, multiple measurements can be taken on the same day at different times, but you may notice this information is missing as the log_date column does not show timestamp values!.
+
+A further analysis will the to answer the following questions,
+1. Which id value has the most number of duplicate records in the health.user_logs table?
+2. Which log_date value had the most duplicate records after removing the max duplicate id value from question 1?
+3. Which measure_value had the most occurences in the health.user_logs value when measure = 'weight'?
+4. How many single duplicated rows exist when measure = 'blood_pressure' in the health.user_logs? How about the total number of duplicate records in the same table?
+5. What percentage of records measure_value = 0 when measure = 'blood_pressure' in the health.user_logs table? How many records are there also for this same condition?
+6. What percentage of records are duplicates in the health.user_logs table?
