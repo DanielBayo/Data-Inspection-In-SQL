@@ -385,11 +385,19 @@ Yes we can therefore confirm this!
 
 Hi Danny,
 
-The dataset has **6** features and **43,891**  records, there are also about **554** unique `id` values which suggest the number of unique users. The records were logged between **11th January, 2015** and **15th November, 2020**. 
+The dataset has **6** features (columns) and **43,891**  records (rows), there are also **554** unique `id` values which suggest the number of unique users. The records were logged between **11th January, 2015** and **15th November, 2020**. 
 
 Taking a look at the `measure` column in the table, **88%** of the total records are a measure of the `blood_glucose`, other measures includes `weight` and `blood_pressure`. 
 
 I also discovered that of the **554** unique `id` in the dataset about **51%** of the records were from a single id in the `id` column.
+
+Even though `blood_pressure` has the least number of the total records, about **562 (23% of 2,417)** of the total records  for `blood_pressure` measure have their `measure_value` to be equal to 0, a further look into the dataset showed that when the `measure_value=0` the relevant `systolic` and `diastolic` fields are recorded. Also considering the instance when the  `measure_value` is not equal to zero for the `blood_pressure` measure, the `systolic` value is the same as the `measure_value`. 
+
+ In conclusion, I found out that the `systolic` and `diastolic` columns contains null value for `weight` and `blood_glucose` measures only. The minimum value for these two columns are -1. Let me know if these findings are helpful.
+
+ Best regards,
+Daniel Ayangbile 
+
 
 
 
