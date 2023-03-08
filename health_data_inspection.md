@@ -396,6 +396,7 @@ Even though `blood_pressure` has the least number of the total records, about **
  In conclusion, I found out that the `systolic` and `diastolic` columns contains null value for `weight` and `blood_glucose` measures only. The minimum value for these two columns are -1. Let me know if these findings are helpful.
 
  Best regards,
+ 
 Daniel Ayangbile 
 
 
