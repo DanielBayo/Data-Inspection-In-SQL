@@ -584,7 +584,37 @@ The context of your dataset will determine if you should care about duplicates o
 For example, multiple measurements can be taken on the same day at different times, but you may notice this information is missing as the log_date column does not show timestamp values!.
 
 A further analysis will the to answer the following questions,
-1. Which id value has the most number of duplicate records in the health.user_logs table?
+1. Which `id` value has the most number of duplicate records in the `health.user_logs` table?
+
+```sql
+WITH most_duplicate AS (
+SELECT
+  id,
+  log_date,
+  measure,
+  measure_value,
+  systolic,
+  diastolic,
+  COUNT(*) AS frequency
+FROM health.user_logs
+GROUP BY 
+  id,
+  log_date,
+  measure,
+  measure_value,
+  systolic,
+  diastolic
+ORDER BY frequency DESC
+)
+SELECT
+  id,
+  SUM(frequency) AS total_duplicate
+FROM most_duplicate
+WHERE frequency >1
+GROUP BY id
+ORDER BY total_duplicate DESC
+LIMIT 10;
+```
 2. Which log_date value had the most duplicate records after removing the max duplicate id value from question 1?
 3. Which measure_value had the most occurences in the health.user_logs value when measure = 'weight'?
 4. How many single duplicated rows exist when measure = 'blood_pressure' in the health.user_logs? How about the total number of duplicate records in the same table?
