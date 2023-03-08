@@ -408,6 +408,10 @@ The first ingredient for this recipe is the basic record count for our table - p
 SELECT COUNT(*)
 FROM deduplic_user_logs;
 ```
+|count|
+|:----|
+|43891|
+
 In order to know the number of distinct records in a table, one of these methods can be used;
 -----------------------------------------
 --COMMON TABLE EXPRESSION (CTE)
@@ -420,6 +424,9 @@ WITH deduplic_user_logs AS (
 SELECT COUNT(*)
 FROM deduplic_user_logs
 ```
+|count|
+|:----|
+|31004|
 ----------------------------------------
 --SUBQUERY
 ----------------------------------------
@@ -428,6 +435,9 @@ SELECT COUNT (*)
 FROM (SELECT DISTINCT *
 FROM health.user_logs) AS dup_count
 ```
+|count|
+|:----|
+|31004|
 ---------------------------------------
 --TEMPORARY TABLE
 ---------------------------------------
@@ -440,6 +450,15 @@ FROM health.user_logs;
 SELECT COUNT(*)
 FROM deduplicated_logs;
 ```
+
+|count|
+|:----|
+|31004|
+
+We now have the row counts of the original table 43,891 and of our deduplicated table 31,004
+It’s pretty safe to say that we have some deuplicate records!
+By comparing the counts of the original and the deduplicated, we can prove the presence of duplicates.
+
 
 #### How do I know which to use?
 The answer to this is based on your need for this table later,
