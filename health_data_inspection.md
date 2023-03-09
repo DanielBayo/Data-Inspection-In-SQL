@@ -615,8 +615,177 @@ GROUP BY id
 ORDER BY total_duplicate DESC
 LIMIT 10;
 ```
+|id|total_duplicate|
+|:----|:----|
+|054250c692e07a9fa9e62e345231df4b54ff435d|17279|
+|ee653a96022cc3878e76d196b1667d95beca2db6|758|
+|0f7b13f3f0512e6546b8d2c0d56e564a2408536a|485|
+|6c2f9a8372dac248192c50219c97f9087ab778ba|106|
+|981197b530b9ec5032abb0ffe4b69dba3649f467|77|
+|907d1231aed4a3540b30f91b336130746042ce47|69|
+|316f2f73322d8edcea74d4f22b6749bf2dc3dd9a|58|
+|df0da942ab95c538f96d70dead8353e348845efe|45|
+|abc634a555bbba7d6d6584171fdfa206ebf6c9a0|42|
+|576fdb528e5004f733912fae3020e7d322dbc31a|41|
+
 2. Which log_date value had the most duplicate records after removing the max duplicate id value from question 1?
+```sql
+WITH most_duplicate AS (
+  SELECT
+    id,
+    log_date,
+    measure,
+    measure_value,
+    systolic,
+    diastolic,
+    COUNT(*) AS frequency
+  FROM health.user_logs
+  WHERE id!='054250c692e07a9fa9e62e345231df4b54ff435d'
+  GROUP BY 
+    id,
+    log_date,
+    measure,
+    measure_value,
+    systolic,
+    diastolic
+  ORDER BY frequency DESC
+)
+SELECT
+  log_date,
+  SUM(frequency) AS total_duplicate
+FROM most_duplicate
+WHERE frequency >1 
+GROUP BY 
+  log_date
+ORDER BY total_duplicate DESC
+LIMIT 10;
+```
+|log_date|total_duplicate|
+|:----|:----|
+|2019-12-11T00:00:00.000Z|55|
+|2019-12-10T00:00:00.000Z|22|
+|2020-03-08T00:00:00.000Z|20|
+|2020-04-11T00:00:00.000Z|20|
+|2020-06-12T00:00:00.000Z|19|
+|2020-07-30T00:00:00.000Z|18|
+|2020-07-31T00:00:00.000Z|17|
+|2020-06-11T00:00:00.000Z|16|
+|2020-07-20T00:00:00.000Z|16|
+|2020-06-14T00:00:00.000Z|16|
+
 3. Which measure_value had the most occurences in the health.user_logs value when measure = 'weight'?
+
+```sql
+SELECT
+  measure_value,
+  COUNT(measure_value) AS frequency
+FROM health.user_logs
+WHERE measure='weight'
+GROUP BY 
+  measure_value
+ORDER BY frequency DESC
+LIMIT 10;
+```
+|measure_value|frequency|
+|:----|:----|
+|68.49244787|109|
+|67.58526313|107|
+|63.50288|44|
+|62.595696|44|
+|64.863656|39|
+|62.142104|39|
+|65.317248|38|
+|65.77084|37|
+|78.698276195|29|
+|79.151868565|27|
+
 4. How many single duplicated rows exist when measure = 'blood_pressure' in the health.user_logs? How about the total number of duplicate records in the same table?
+
+```sql
+WITH bp_duplicate AS (
+  SELECT
+    id,
+    measure,
+    measure_value,
+    systolic,
+    diastolic,
+    COUNT(*) AS frequency
+  FROM health.user_logs
+  WHERE measure='blood_pressure'
+  GROUP BY
+    id,
+    log_date,
+    measure,
+    measure_value,
+    systolic,
+    diastolic
+  ORDER BY frequency DESC
+)
+SELECT
+  COUNT(*),
+  SUM(frequency) AS total_bp_dup
+FROM bp_duplicate
+WHERE frequency=2;
+```
+|count|total_bp_dup|
+|:----|:----|
+|140|280|
+
 5. What percentage of records measure_value = 0 when measure = 'blood_pressure' in the health.user_logs table? How many records are there also for this same condition?
+
+```sql
+WITH all_measure_values AS (
+  SELECT
+    measure_value,
+    COUNT(*) AS total_records,
+    SUM(COUNT(*)) OVER () AS overall_total
+  FROM health.user_logs
+  WHERE measure = 'blood_pressure'
+  GROUP BY measure_value
+)
+SELECT
+  measure_value,
+  total_records,
+  overall_total,
+  ROUND(100 * total_records::NUMERIC / overall_total, 2) AS percentage
+FROM all_measure_values
+WHERE measure_value = 0;
+```
+|measure_value|total_records|overall_total|percentage|
+|:----|:----|:----|:----|
+|0|562|2417|23.25|
+
 6. What percentage of records are duplicates in the health.user_logs table?
+
+```sql
+WITH groupby_counts AS (
+  SELECT
+    id,
+    log_date,
+    measure,
+    measure_value,
+    systolic,
+    diastolic,
+    COUNT(*) AS frequency
+  FROM health.user_logs
+  GROUP BY
+    id,
+    log_date,
+    measure,
+    measure_value,
+    systolic,
+    diastolic
+)
+SELECT
+  ROUND(
+    100 * SUM(CASE
+        WHEN frequency > 1 THEN frequency - 1
+        ELSE 0 END
+    )::NUMERIC / SUM(frequency),
+    2
+  ) AS duplicate_percentage
+FROM groupby_counts;
+```
+|duplicate_percentage|
+|:----|
+|29.36|
